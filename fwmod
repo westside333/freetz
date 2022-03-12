@@ -249,7 +249,9 @@ fi
 if [ "${FREETZ_SQUASHFS_VERSION}" -eq 3 -a "${FREETZ_AVM_SQUASHFS_COMPRESSION}" == "lzma" ]; then
 	MKSQUASHFS_OPTIONS+=" -lzma1"
 fi
-
+if [ "${FREETZ_AVM_HAS_SEPARATE_FILESYSTEM_IMAGE}" = "n" -a "${FREETZ_SQUASHFS_VERSION}" -eq 4 ]; then
+	"${MKSQUASHFS_TOOL[4]}" -h 2>&1 | grep -q -- -avm-strict 2>/dev/null 1>&2 && MKSQUASHFS_OPTIONS+=" -avm-strict"
+fi
 
 #######################################
 ## Initialise fakeroot incl. caching ##
@@ -1032,7 +1034,7 @@ if [ "$DO_MOD" -gt 0 ]; then
 		if [ "$FREETZ_SHARE_terminfo" == "y" ]; then
 			echo1 "installing terminfos"
 			for i in $(set | grep ^FREETZ_SHARE_terminfo_.*=y |grep -v '^FREETZ_SHARE_terminfo_showall=' ); do
-				dn=usr/share/terminfo
+				dn=${FREETZ_SHARE_libncurses_terminfo_dir#/}
 				conf=${i%%=*}
 				bn=${conf#FREETZ_SHARE_terminfo_}
 				fn=$(echo "$bn" | sed 's/MINUS/-/g;s/PLUS/+/g;s/\DOT/./g')
